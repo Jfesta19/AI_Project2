@@ -62,7 +62,7 @@ class ReflexAgent(Agent):
         newScaredTimes holds the number of moves that each ghost will remain
         scared because of Pacman having eaten a power pellet.
 
-        Print out these variables to see what you're getting, then combine them
+        #print out these variables to see what you're getting, then combine them
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
@@ -104,6 +104,7 @@ def scoreEvaluationFunction(currentGameState):
       This evaluation function is meant for use with adversarial search agents
       (not reflex agents).
     """
+
     return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
@@ -127,9 +128,10 @@ class MultiAgentSearchAgent(Agent):
         self.depth = int(depth)
 
 class MinimaxAgent(MultiAgentSearchAgent):
-    """
-      Your minimax agent (question 2)
-    """
+
+    MAX_VALUE = 999999
+    MIN_VALUE = -999999
+    bestAction = None
 
     def getAction(self, gameState):
         """
@@ -149,7 +151,65 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
 
-        util.raiseNotDefined()
+        amount = self.miniMax(gameState, 0)
+        action = self.bestAction
+        #print "Chosen action: ", action
+        return action
+
+    def miniMax(self, gameState, depth):
+        if self.terminalTest(gameState):
+            return self.utility(gameState)
+        if self.cutoffTest(gameState, depth):
+            #print "cutoff"
+            return self.evaluationFunction(gameState)
+        if self.playerIsMax(gameState, depth):
+            maxValue = self.MIN_VALUE
+
+            actions = gameState.getLegalActions(depth % gameState.getNumAgents() )
+            self.bestAction = actions[0]
+            for action in gameState.getLegalActions(0):
+                stateValue = self.miniMax(gameState.generateSuccessor(0, action), depth + 1)
+                #print action, stateValue
+                if stateValue >= maxValue:
+                    maxValue = stateValue
+                    self.bestAction = action
+            #print self.bestAction, maxValue
+            #print "+"*60
+            print "Max: ", maxValue
+            return maxValue
+            ##print "pacman action: ", self.self.bestAction
+        else:
+            minValue = self.MAX_VALUE
+            actions = gameState.getLegalActions(depth % gameState.getNumAgents())
+            for action in gameState.getLegalActions(depth % gameState.getNumAgents()):
+                stateValue = self.miniMax(gameState.generateSuccessor(depth % gameState.getNumAgents(), action), depth + 1)
+                if stateValue <= minValue:
+                    minValue = stateValue
+            ##print "ghost action: ", depth % gameState.getNumAgents() , self.self.bestAction
+            #print minValue
+            #print "-"*60
+            print "Min: ", minValue
+            return minValue
+
+
+    def cutoffTest(self, gameState, depth):
+        if depth == self.depth:
+            return True
+        return False
+
+    def terminalTest(self, gameState):
+        if gameState.isWin() or gameState.isLose():
+            return True
+        return False
+
+    def utility(self, gameState):
+        #print "UTILITY!!"
+        print "Terminal:", gameState.getScore()
+        return gameState.getScore()
+    def playerIsMax(self, gameState, depth):
+        if depth % gameState.getNumAgents()  == 0:
+            return True
+        return False
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
