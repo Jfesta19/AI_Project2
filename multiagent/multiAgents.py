@@ -213,7 +213,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        amount = self.miniMax(gameState, 0, MIN_VALUE, MAX_VALUE)
+        amount = self.miniMax(gameState, 0, self.MIN_VALUE, self.MAX_VALUE)
         action = self.bestAction
         return action
 
