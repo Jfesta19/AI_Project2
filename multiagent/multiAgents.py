@@ -129,8 +129,8 @@ class MultiAgentSearchAgent(Agent):
 
 class MinimaxAgent(MultiAgentSearchAgent):
 
-    MAX_VALUE = 999999
-    MIN_VALUE = -999999
+    MAX_VALUE = 999999.00
+    MIN_VALUE = -999999.00
     bestAction = None
 
     def getAction(self, gameState):
@@ -160,32 +160,33 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if self.terminalTest(gameState):
             return self.utility(gameState)
         if self.cutoffTest(gameState, depth):
-            #print "cutoff"
+            print "cutoff"
             return self.evaluationFunction(gameState)
         if self.playerIsMax(gameState, depth):
             maxValue = self.MIN_VALUE
 
-            actions = gameState.getLegalActions(depth % gameState.getNumAgents() )
-            self.bestAction = actions[0]
-            for action in gameState.getLegalActions(0):
+            actions = gameState.getLegalActions(0)
+            bestAction = actions[0]
+            for action in actions:
                 stateValue = self.miniMax(gameState.generateSuccessor(0, action), depth + 1)
                 #print action, stateValue
-                if stateValue >= maxValue:
+                if stateValue > maxValue:
                     maxValue = stateValue
-                    self.bestAction = action
+                    bestAction = action
             #print self.bestAction, maxValue
             #print "+"*60
+            self.bestAction = bestAction
             print "Max: ", maxValue
             return maxValue
             ##print "pacman action: ", self.self.bestAction
         else:
             minValue = self.MAX_VALUE
             actions = gameState.getLegalActions(depth % gameState.getNumAgents())
-            for action in gameState.getLegalActions(depth % gameState.getNumAgents()):
+            for action in actions:
                 stateValue = self.miniMax(gameState.generateSuccessor(depth % gameState.getNumAgents(), action), depth + 1)
-                if stateValue <= minValue:
+                if stateValue < minValue:
                     minValue = stateValue
-            ##print "ghost action: ", depth % gameState.getNumAgents() , self.self.bestAction
+            #print "ghost action: ", depth % gameState.getNumAgents() , self.self.bestAction
             #print minValue
             #print "-"*60
             print "Min: ", minValue
@@ -204,8 +205,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def utility(self, gameState):
         #print "UTILITY!!"
-        print "Terminal:", gameState.getScore()
+        print "Terminal: ", gameState.getScore()
         return gameState.getScore()
+
     def playerIsMax(self, gameState, depth):
         if depth % gameState.getNumAgents()  == 0:
             return True
