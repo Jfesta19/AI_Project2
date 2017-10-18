@@ -205,13 +205,70 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
+    MAX_VALUE = 999999.00
+    MIN_VALUE = -999999.00
+    bestAction = None
 
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        amount = self.miniMax(gameState, 0, -9999999999, 9999999999)
+        action = self.bestAction
+        return action
+
+    def miniMax(self, gameState, depth, alpha, beta):
+        if self.terminalTest(gameState):
+            return self.utility(gameState)
+        if self.cutoffTest(gameState, depth):
+            return self.evaluationFunction(gameState)
+        agent = depth % gameState.getNumAgents()
+        if self.playerIsMax(gameState, depth):
+            maxValue = self.MIN_VALUE
+            actions = gameState.getLegalActions(0)
+            bestAction = actions[0]
+            for action in actions:
+                stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1, alpha, beta)
+                if stateValue > maxValue:
+                    maxValue = stateValue
+                    bestAction = action
+                if maxValue > beta:
+                    return maxValue
+                alpha = max(alpha, maxValue)
+            self.bestAction = bestAction
+            return maxValue
+        else:
+            minValue = self.MAX_VALUE
+            actions = gameState.getLegalActions(agent)
+            for action in actions:
+                stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1, alpha, beta)
+                if stateValue < minValue:
+                    minValue = stateValue
+                if minValue < alpha:
+                    return minValue
+                beta = min(beta, minValue)
+            return minValue
+
+
+    def cutoffTest(self, gameState, depth):
+        plies = depth / gameState.getNumAgents()
+
+        if plies == self.depth:
+            return True
+        return False
+
+    def terminalTest(self, gameState):
+        if gameState.isWin() or gameState.isLose():
+            return True
+        return False
+
+    def utility(self, gameState):
+        return gameState.getScore()
+
+    def playerIsMax(self, gameState, depth):
+        if depth % gameState.getNumAgents()  == 0:
+            return True
+        return False
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
