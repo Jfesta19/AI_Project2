@@ -213,7 +213,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        amount = self.miniMax(gameState, 0, -9999999999, 9999999999)
+        amount = self.miniMax(gameState, 0, MIN_VALUE, MAX_VALUE)
         action = self.bestAction
         return action
 
@@ -271,19 +271,83 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         return False
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
-    """
-      Your expectimax agent (question 4)
-    """
 
-    def getAction(self, gameState):
-        """
-          Returns the expectimax action using self.depth and self.evaluationFunction
+        MAX_VALUE = 999999.00
+        MIN_VALUE = -999999.00
+        bestAction = None
 
-          All ghosts should be modeled as choosing uniformly at random from their
-          legal moves.
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def getAction(self, gameState):
+            """
+              Returns the minimax action from the current gameState using self.depth
+              and self.evaluationFunction.
+
+              Here are some method calls that might be useful when implementing minimax.
+
+              gameState.getLegalActions(agentIndex):
+                Returns a list of legal actions for an agent
+                agentIndex=0 means Pacman, ghosts are >= 1
+
+              gameState.generateSuccessor(agentIndex, action):
+                Returns the successor game state after an agent takes an action
+
+              gameState.getNumAgents():
+                Returns the total number of agents in the game
+            """
+            amount = self.miniMax(gameState, 0)
+            action = self.bestAction
+            return action
+
+        def miniMax(self, gameState, depth):
+            if self.terminalTest(gameState):
+                return self.utility(gameState)
+            if self.cutoffTest(gameState, depth):
+                return self.evaluationFunction(gameState)
+            agent = depth % gameState.getNumAgents()
+            if self.playerIsMax(gameState, depth):
+                maxValue = self.MIN_VALUE
+
+                actions = gameState.getLegalActions(0)
+                bestAction = actions[0]
+                for action in actions:
+                    stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1)
+                    if stateValue > maxValue:
+                        maxValue = stateValue
+                        bestAction = action
+                self.bestAction = bestAction
+                return maxValue
+            else:
+                actions = gameState.getLegalActions(agent)
+                totalStateValue = 0
+                numberOfActions = 0
+                for action in actions:
+                    numberOfActions = numberOfActions + 1
+                    stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1)
+                    totalStateValue = totalStateValue + stateValue
+
+                averageValue = totalStateValue / numberOfActions
+                return averageValue
+
+
+        def cutoffTest(self, gameState, depth):
+            plies = depth / gameState.getNumAgents()
+
+            if plies == self.depth:
+                return True
+            return False
+
+        def terminalTest(self, gameState):
+            if gameState.isWin() or gameState.isLose():
+                return True
+            return False
+
+        def utility(self, gameState):
+            return gameState.getScore()
+
+        def playerIsMax(self, gameState, depth):
+            if depth % gameState.getNumAgents()  == 0:
+                return True
+            return False
+
 
 def betterEvaluationFunction(currentGameState):
     """
