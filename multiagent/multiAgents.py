@@ -324,7 +324,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                     stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1)
                     totalStateValue = totalStateValue + stateValue
 
-                averageValue = totalStateValue / numberOfActions
+                averageValue = totalStateValue * 1.0 / numberOfActions
                 return averageValue
 
 
@@ -350,14 +350,40 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
 
 def betterEvaluationFunction(currentGameState):
+
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
       DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+
+    ghostScore = 0
+    ghostPos = currentGameState.getGhostPositions()
+    pX, pY = newPos
+
+    for p in ghostPos:
+        gX, gY = p
+        ghostScore = abs(pX - gX) + abs(pY - gY)
+
+    foodScore = len(newFood.asList()) #doesnt help for itermediate steps
+    cFood = currentGameState.getFood().asList()
+    fScore = 999999999999
+    for f in cFood:
+        fX, fY = f
+        fD = abs(pX - fX) + abs(pY - fY)
+        if fD < fScore:
+            fScore = fD
+
+    #10/(.1 + fScore)
+    n = newFood.asList()
+    if ghostScore > 2:
+        return 20/(.01 + len(n)) + 10/(.1 + fScore+3)
+    else:
+        return 20/(.01 + len(n)) + 10/(.1 + fScore) - 1000
 
 # Abbreviation
 better = betterEvaluationFunction
