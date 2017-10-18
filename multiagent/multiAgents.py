@@ -104,7 +104,6 @@ def scoreEvaluationFunction(currentGameState):
       This evaluation function is meant for use with adversarial search agents
       (not reflex agents).
     """
-
     return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
@@ -150,51 +149,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-
         amount = self.miniMax(gameState, 0)
         action = self.bestAction
-        #print "Chosen action: ", action
         return action
 
     def miniMax(self, gameState, depth):
         if self.terminalTest(gameState):
             return self.utility(gameState)
         if self.cutoffTest(gameState, depth):
-            print "cutoff"
             return self.evaluationFunction(gameState)
+        agent = depth % gameState.getNumAgents()
         if self.playerIsMax(gameState, depth):
             maxValue = self.MIN_VALUE
 
             actions = gameState.getLegalActions(0)
             bestAction = actions[0]
             for action in actions:
-                stateValue = self.miniMax(gameState.generateSuccessor(0, action), depth + 1)
-                #print action, stateValue
+                stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1)
                 if stateValue > maxValue:
                     maxValue = stateValue
                     bestAction = action
-            #print self.bestAction, maxValue
-            #print "+"*60
             self.bestAction = bestAction
-            print "Max: ", maxValue
             return maxValue
-            ##print "pacman action: ", self.self.bestAction
         else:
             minValue = self.MAX_VALUE
-            actions = gameState.getLegalActions(depth % gameState.getNumAgents())
+            actions = gameState.getLegalActions(agent)
             for action in actions:
-                stateValue = self.miniMax(gameState.generateSuccessor(depth % gameState.getNumAgents(), action), depth + 1)
+                stateValue = self.miniMax(gameState.generateSuccessor(agent, action), depth + 1)
                 if stateValue < minValue:
                     minValue = stateValue
-            #print "ghost action: ", depth % gameState.getNumAgents() , self.self.bestAction
-            #print minValue
-            #print "-"*60
-            print "Min: ", minValue
             return minValue
 
 
     def cutoffTest(self, gameState, depth):
-        if depth == self.depth:
+        plies = depth / gameState.getNumAgents()
+
+        if plies == self.depth:
             return True
         return False
 
@@ -204,8 +194,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return False
 
     def utility(self, gameState):
-        #print "UTILITY!!"
-        print "Terminal: ", gameState.getScore()
         return gameState.getScore()
 
     def playerIsMax(self, gameState, depth):
